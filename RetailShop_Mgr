@@ -1,0 +1,145 @@
+package RetailShop;
+
+import DbLoc.Locator;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import javax.ejb.Stateless;
+import javax.sql.DataSource;
+import retailcommonlib.ldap.LdapConnStatus;
+import retailcommonlib.user.UserProf_mp;
+
+@Stateless
+public class Retail_Mgr implements Retail_MgrLocal {
+    Locator loc = new Locator();
+    DataSource ds = null;
+    
+    public Retail_Mgr() {
+        try {
+            ds = loc.getDataSource(loc.getJNDI_NETINFO_TEST());
+        }
+        catch ( Exception xx ) {}
+    }
+    
+    public UserProf_mp getUserInfo( String UserId ){
+        Connection   conn = null; Statement stmt = null; ResultSet rs = null; DataSource ds = null;
+        UserProf_mp uProf = new UserProf_mp();
+        String      query = "", active_flag = "no";
+        int        status = -1;
+        
+        try {
+            ds   = loc.getDataSource(loc.getJNDI_NETINFO_TEST());
+            conn = ds.getConnection();
+            if ( conn == null ) throw new Exception("ERROR: DB - Connection Error !!");
+            stmt = conn.createStatement();
+            
+            query = " SELECT level_id, first_name, last_name FROM retail_users WHERE LOWER(user_id) = '" + UserId + "' ";
+            rs    = stmt.executeQuery(query);
+            if ( rs.next() ) {
+                uProf.setLevel_id(rs.getString(1));
+                uProf.setFirst_Name(rs.getString(2));
+                uProf.setLast_Name(rs.getString(3));
+            }
+            
+            /*not gonna work no connection to database once logged in level id and user will be 
+            set in session and the user will be redirected to new jsp ShopMenu*/
+            
+            uProf.setMessage("");
+            uProf.setOk(true);
+        }
+        catch ( Exception ex ) {
+            uProf.setMessage("ERROR: Unable to continue your Operation !!");
+        }
+        finally {
+            try {
+                try { if ( rs   != null )     rs.close(); } catch ( Exception ex ) {}
+                try { if ( conn != null )   conn.close(); } catch ( Exception ex ) {}
+                try { if ( stmt != null )   stmt.close(); } catch ( Exception ex ) {}
+            }
+            catch ( Exception xx ) {}
+        }
+        
+        return uProf;
+    }
+    
+    public LdapConnStatus getFinalAmount( String level_id,String user_id, int product_type, int amount ){
+        LdapConnStatus ldap = new LdapConnStatus();
+        int nbr = 0, disc = 0, FinalAmount = 0;
+        
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyymmdd");
+	LocalDate localDate = LocalDate.now();
+	
+        String str_date = dtf.format(localDate);
+        int currentDate = Integer.parseInt(str_date);
+        
+        try {
+            if( product_type != 1 ){// product isn't grocerie
+                if( amount > 100 ){
+                    nbr = amount / 100;
+                    FinalAmount = amount - ( nbr * 5 );
+                }
+
+                else{
+                    if(level_id.equalsIgnoreCase("1")){ //employee of the store
+                        disc = ( amount * 30 ) / 100;
+                        FinalAmount = amount - disc;
+                    }
+                    else if( level_id.equalsIgnoreCase("2") ){//affiliate of the store
+                        disc = ( amount * 10 ) / 100;
+                        FinalAmount = amount - disc;
+                    }
+                    else {//Customer
+                        String date = getDateOfCustomer( user_id );
+                        if( ( currentDate - Integer.parseInt(date)) > 2 ) {
+                            disc = ( amount * 5 ) / 100;
+                            FinalAmount = amount - disc;
+                        }
+                        else FinalAmount = amount;
+                    }
+                }
+            }
+            
+            else FinalAmount = amount;
+            
+            ldap.setRunOk(true);
+            ldap.setAmount(FinalAmount);
+        }
+        
+        catch( Exception ex ){} 
+        
+        return ldap;
+    }
+    
+    private String getDateOfCustomer( String user_id ){
+        Connection   conn = null; Statement stmt = null; ResultSet rs = null; DataSource ds = null;
+        String      query = "", date = "";
+        
+        try {
+            ds   = loc.getDataSource(loc.getJNDI_NETINFO_TEST());
+            conn = ds.getConnection();
+            if ( conn == null ) throw new Exception("ERROR: DB - Connection Error !!");
+            stmt = conn.createStatement();
+            
+            query = " SELECT to_char(user_join_date,'yyyymmdd') FROM retail_users WHERE LOWER(user_id) = '" + user_id + "' ";
+            rs    = stmt.executeQuery(query);
+            if ( rs.next() ) {
+                date = rs.getString(1);
+            }
+            
+        }
+        catch ( Exception ex ) {}
+        finally {
+            try {
+                try { if ( rs   != null )     rs.close(); } catch ( Exception ex ) {}
+                try { if ( conn != null )   conn.close(); } catch ( Exception ex ) {}
+                try { if ( stmt != null )   stmt.close(); } catch ( Exception ex ) {}
+            }
+            catch ( Exception xx ) {}
+        }
+        
+        return date;
+    }
+}
+
