@@ -1,0 +1,85 @@
+package retailcommonlib.user;
+
+public class UserProf_mp {
+    private boolean Ok         = false;
+    private String  Message    = "";
+    private String  actBut     = "";
+    private String  User_Id    = "";
+    private String  First_Name = "";
+    private String  Last_Name  = "";
+    private String  Full_Name  = "";
+    private String  Status     = "";
+    private String  Level_id   = "";
+
+    public boolean isOk() {
+        return Ok;
+    }
+
+    public void setOk(boolean Ok) {
+        this.Ok = Ok;
+    }
+
+    public String getMessage() {
+        return Message;
+    }
+
+    public void setMessage(String Message) {
+        this.Message = Message;
+    }
+
+    public String getActBut() {
+        return actBut;
+    }
+
+    public void setActBut(String actBut) {
+        this.actBut = actBut;
+    }
+
+    public String getUser_Id() {
+        return User_Id;
+    }
+
+    public void setUser_Id(String User_Id) {
+        this.User_Id = User_Id;
+    }
+
+    public String getFirst_Name() {
+        return First_Name;
+    }
+
+    public void setFirst_Name(String First_Name) {
+        this.First_Name = First_Name;
+    }
+
+    public String getLast_Name() {
+        return Last_Name;
+    }
+
+    public void setLast_Name(String Last_Name) {
+        this.Last_Name = Last_Name;
+    }
+
+    public String getFull_Name() {
+        return Full_Name;
+    }
+
+    public void setFull_Name(String Full_Name) {
+        this.Full_Name = Full_Name;
+    }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String Status) {
+        this.Status = Status;
+    }    
+
+    public String getLevel_id() {
+        return Level_id;
+    }
+
+    public void setLevel_id(String Level_id) {
+        this.Level_id = Level_id;
+    }
+}
