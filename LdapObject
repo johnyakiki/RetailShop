@@ -1,0 +1,45 @@
+package retailcommonlib.ldap;
+
+import java.util.Vector;
+
+public class LdapConnStatus {
+    
+    private Vector  list    = new Vector();
+    private boolean runOk   = false;
+    private int     amount  = 0;
+    private String  message = "";
+    
+    public LdapConnStatus() {}
+
+    public boolean isRunOk() {
+        return runOk;
+    }
+
+    public void setRunOk(boolean runOk) {
+        this.runOk = runOk;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Vector getList() {
+        return list;
+    }
+
+    public void setList(Vector list) {
+        this.list = list;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
+}    
